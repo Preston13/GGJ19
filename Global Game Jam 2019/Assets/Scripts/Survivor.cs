@@ -8,15 +8,20 @@ public class Survivor : MonoBehaviour
     /// This will control aspects of the player that is not movement
     /// </summary>
 
+
+    public float maxHealth = 100;
+
+    private float curHealth;
+
     private bool hasGasMaskBottom = false;
     private bool hasGasMaskTop = false;
     private bool fullgasMask = false;
-    private bool inHome = false;
+    public bool inHome = false;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        curHealth = maxHealth;
     }
 
     // Update is called once per frame
@@ -26,10 +31,28 @@ public class Survivor : MonoBehaviour
         {
             fullgasMask = true;
         }
+
+        if(inHome == false && fullgasMask == false)
+        {
+            curHealth -= 1f;
+        }
+        else if(inHome == false && fullgasMask == true)
+        {
+            curHealth -= 0.5f;
+        }
+        else if(inHome == true && curHealth != maxHealth)
+        {
+            curHealth += 1f;
+        }
     }
 
     private void OnTriggerEnter(Collider coll)
     {
+        if(coll.name == "pixel house")
+        {
+            inHome = true;
+        }
+
         PickUp pup = coll.GetComponent<PickUp>();
 
         if(pup == null)
@@ -40,11 +63,21 @@ public class Survivor : MonoBehaviour
         if(pup.itemType == PickUp.eType.gasMaskBottom)
         {
             hasGasMaskBottom = true;
+            Destroy(coll.gameObject);
         }
         if(pup.itemType == PickUp.eType.gasMaskTop)
         {
             hasGasMaskTop = true;
+            Destroy(coll.gameObject);
         }
-        Destroy(coll.gameObject);
+        
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if(other.name == "pixel house")
+        {
+            inHome = false;
+        }
     }
 }
